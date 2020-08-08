@@ -5,6 +5,11 @@
  */
 package it.lule.cardgame;
 
+import it.lule.cardgame.broker.MQTTBroker;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  *
  * @author Luca
@@ -12,11 +17,18 @@ package it.lule.cardgame;
 public class Main {
     
     public static void main(String[] args) {
-        System.out.println("[CardGame]Initializing..");
-        //preloads data
-        System.out.println("[CardGame]Initializing.. [OK]");
-        //insert loading GUI
-        System.out.println("[CardGame] bye");
+        try {
+            System.out.println("[CardGame]Initializing..");
+            //preloads data
+            System.out.println("[CardGame]Initializing.. [OK]");
+            //insert loading GUI
+            System.out.println("[CardGame] bye");
+            
+            MQTTBroker b= new MQTTBroker();
+            b.start();
+        } catch (IOException ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
     
 }
