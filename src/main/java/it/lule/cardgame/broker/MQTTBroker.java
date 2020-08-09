@@ -15,18 +15,23 @@ import io.moquette.server.Server;
 import io.moquette.server.config.ClasspathResourceLoader;
 import io.moquette.server.config.ResourceLoaderConfig;
 import io.netty.buffer.ByteBufUtil;
+import it.lule.cardgame.db.DBException;
+import it.lule.cardgame.db.DBManager;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
  * @author Luca
  */
 public class MQTTBroker {
+    public static final String LOGIN_TOPIC = "loginTopic";
     
-    List<String> ON_LINE = new LinkedList<>();
+    private List<String> ON_LINE = new LinkedList<>();
 
     public void start() throws IOException {
 
@@ -61,6 +66,19 @@ public class MQTTBroker {
                     public void onPublish(InterceptPublishMessage msg) {
                         final String decodedPayload = new String(ByteBufUtil.getBytes(msg.getPayload()), UTF_8);
                         System.out.println("Received on topic: " + msg.getTopicName() + " content: " + decodedPayload);
+                        String topic = msg.getTopicName();
+                        
+                        if ( topic.equals(LOGIN_TOPIC)){
+                            String[] split = decodedPayload.split(",");
+                            String nickname = split[0];
+                            String password = split[1];
+                            try {
+                                DBManager.getInstance().login(nickname, password);
+                            } catch (DBException ex) {
+                                Logger.getLogger(MQTTBroker.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+                        }
+                        
                     }
                 }));
 
