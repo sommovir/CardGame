@@ -1,0 +1,29 @@
+
+1 - STABILIZZAZIONE MQTT
+    A) ogni client deve avere una connessione univoca nel server                    [TODO]
+    B) non deve essere possibile far collegare più volte lo stesso utente al server [TODO]
+
+
+
+
+2 - Costruire un sistema di autenticazione dell'utente. 
+    LATO SERVER: 
+    S.A) Quando un utente si connette il server deve ricevere username e password criptata  [TODO]
+    S.B) Il server confronta la password e il nickane con i dati del DB ( per ora fasullo) 
+         e verifica che esista, se esiste e non è già connesso allora ritorna un segnale 
+         di ACK e consente la connessione                                                   [TODO]
+    S.C) Quando un utente si è quindi collegato con successo viene mandato in broadcast
+         l'evento di connessione-utente e tutti i client connessi vengono aggiornati        [TODO]
+    S.D) Quando un utente si disconnette viene mandato in broadcast tale evento             [TODO]
+    S.E) Il server manda errori specifici a seconda che un client mandi username
+         inesistenti, o password errate o client già connesso.                              [TODO]
+
+
+    LATO CLIENT
+    C.A) Costruire un prompt per il login                                                   [TODO] 
+    C.B) Il Client visualizza messaggi appropriati a seconda del punto 2.S.E                [TODO]
+    C.C) Una volta ricevuto l'ACK dal server il client si connette ricevendo tutti
+         gli altri dati utente.                                                             [TODO]
+    C.D) Implementare il meccanismo di disconnesione pulita                                 [TODO]
+    C.E) Visualizzare la lista di tutti gli utenti connessi e che sia dinamicamente
+         aggiornata.                                                                        [TODO]
