@@ -20,6 +20,11 @@ public class User {
         this.coin = coin;
     }
 
+    public User(String nickName, String password) {
+        this.nickName = nickName;
+        this.password = password;
+    }
+
     public User() {
     }
 

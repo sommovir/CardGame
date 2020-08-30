@@ -53,6 +53,14 @@ public class DBManager {
 
     }
 
+    public void addUsers(String nickname, User user) throws DBException {
+        if (userMap.containsKey(nickname)){
+            throw new DBException(DBErrorCode.USER_ALREADY_EXISTS);
+        }
+
+        userMap.put(nickname, user);
+    }
+    
     public Map<String, User> getUserMap() {
         return userMap;
     }

@@ -9,18 +9,23 @@ package it.lule.cardgame.db;
  *
  * @author lele
  */
-public enum DBErrorCode {
+   
+    public enum DBErrorCode {
         USER_NOT_EXISTS(1),
         USER_ALREADY_CONNECTED(2),
-        WRONG_PASSWORD(3);
-        
+        WRONG_PASSWORD(3),
+        USER_ALREADY_EXISTS(4);
+
         private int code;
 
-    private DBErrorCode(int code) {
-        this.code = code;
+        private DBErrorCode(int code) {
+            this.code = code;
+        }
+
+        public int getCode() {
+            return code;
+        }
     }
-        
-    public int getCode(){
-        return code;
-    }
-}
+
+
+
