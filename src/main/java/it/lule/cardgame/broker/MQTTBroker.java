@@ -68,6 +68,12 @@ public class MQTTBroker {
                         System.out.println("Received on topic: " + msg.getTopicName() + " content: " + decodedPayload);
                         String topic = msg.getTopicName();
                         
+                        // ------------------------------------
+                        if (topic.equals("UserConnected")){
+                            MQTTClient.getInstance().publish(decodedPayload, "Vedo che ti sei connesso");
+                        }
+                        // ------------------------------------
+                        
                         if ( topic.equals(LOGIN_TOPIC)){
                             String[] split = decodedPayload.split(",");
                             String nickname = split[0];
@@ -81,7 +87,8 @@ public class MQTTBroker {
                         
                     }
                 }));
-
+        
+        MQTTClient.getInstance().connect();
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             //app.stop();
             mqtt_broker.stopServer();
