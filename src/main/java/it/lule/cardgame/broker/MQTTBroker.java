@@ -64,6 +64,7 @@ public class MQTTBroker {
 
                     @Override
                     public void onPublish(InterceptPublishMessage msg) {
+                        System.out.println("DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD");
                         final String decodedPayload = new String(ByteBufUtil.getBytes(msg.getPayload()), UTF_8);
                         System.out.println("Received on topic: " + msg.getTopicName() + " content: " + decodedPayload);
                         String topic = msg.getTopicName();
