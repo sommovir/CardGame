@@ -60,6 +60,10 @@ public class MQTTBroker {
                     @Override
                     public void onConnect(InterceptConnectMessage icm) {
                         ON_LINE.add(icm.getClientID());
+                        System.out.println("new connection");
+                        for (String string : ON_LINE) {
+                            System.out.println("Client connected: "+string);
+                        }
                     }
 
                     @Override
