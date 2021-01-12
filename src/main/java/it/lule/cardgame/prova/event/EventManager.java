@@ -3,10 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package it.lule.cardgame.prova.generic;
+package it.lule.cardgame.prova.event;
 
 import java.util.LinkedList;
 import java.util.List;
+import org.eclipse.paho.client.mqttv3.MqttMessage;
 
 /**
  *
@@ -37,9 +38,16 @@ public class EventManager {
         }
     }
     
+    public void updateMessage(String topic, MqttMessage mqttMessage){
+        for (ConnectionEvent connectionEvent : connectionEvents) {
+            connectionEvent.messageArrived(topic, mqttMessage);
+        }
+    }
+    
     public void ackReceided(int error){
         for (ConnectionEvent connectionEvent : connectionEvents) {
             connectionEvent.ackReceided(error);
         }
     }
+    
 }

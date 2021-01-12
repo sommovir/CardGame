@@ -3,7 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package it.lule.cardgame.prova.generic;
+package it.lule.cardgame.prova.event;
+
+import org.eclipse.paho.client.mqttv3.MqttMessage;
 
 /**
  *
@@ -12,6 +14,6 @@ package it.lule.cardgame.prova.generic;
 public interface ConnectionEvent {
 
     public void userConnected(String nickName);
-
+    public void messageArrived(String topic, MqttMessage mqttMessage);
     public void ackReceided(int error);
 }

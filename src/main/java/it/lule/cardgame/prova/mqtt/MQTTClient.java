@@ -5,12 +5,10 @@
  */
 package it.lule.cardgame.prova.mqtt;
 
-import it.lule.cardgame.prova.generic.ChannelEnum;
-import it.lule.cardgame.prova.generic.EventManager;
-import it.lule.cardgame.prova.generic.Topics;
+
+import it.lule.cardgame.prova.enumname.ChannelEnum;
+import it.lule.cardgame.prova.event.EventManager;
 import java.util.Date;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttClient;
@@ -28,40 +26,44 @@ public class MQTTClient implements MqttCallback {
     public static MQTTClient instance = null;
     private final int qos = 2;
     private MqttClient client = null;
-    protected String subscribeMyChannel;
-    protected final String clientID = "" + new Date().getTime();
-    protected String user;
+    private final String clientID = "" + new Date().getTime();
+    private String user;
+    private String broker = "tcp://0.0.0.0:1883";
 
-    String broker = "tcp://0.0.0.0:1883";
-
-    public static MQTTClient getInstance() {
+    public static MQTTClient getInstance() throws MqttException {
         if (instance == null) {
             instance = new MQTTClient();
         }
         return instance;
     }
 
-    public MQTTClient() {
+    public MQTTClient() throws MqttException {
         super();
-        initClient();
+        initializeConnection();
+    }
+
+    /**
+     * Get Subscribe My Channel
+     *
+     * @return
+     */
+    public String getSubscribeMyChannel() {
+        String subscribeMyChannel = user + clientID;
+        return subscribeMyChannel;
     }
 
     /* inizializza il client */
-    private void initClient() {
-        try {
-            if (client == null || !client.isConnected()) {
-                client = new MqttClient(broker, clientID, new MemoryPersistence());
-            }
-
-        } catch (MqttException ex) {
-            Logger.getLogger(MQTTClient.class.getName()).log(Level.SEVERE, null, ex);
+    private void initClient() throws MqttException {
+        if (client == null || !client.isConnected()) {
+            client = new MqttClient(broker, clientID, new MemoryPersistence());
         }
     }
 
     /**
-     * Connect User 
-     * @throws MqttException 
-     * @deprecated 
+     * Connect User
+     *
+     * @throws MqttException
+     * @deprecated
      */
     public void connect() throws MqttException {
         initializeConnection();
@@ -69,8 +71,9 @@ public class MQTTClient implements MqttCallback {
 
     /**
      * Connect User
+     *
      * @param user
-     * @throws MqttException 
+     * @throws MqttException
      */
     public void connect(String user) throws MqttException {
         initializeConnection();
@@ -79,36 +82,42 @@ public class MQTTClient implements MqttCallback {
 
     /**
      * Initialize Connection
-     * @throws MqttException 
+     *
+     * @throws MqttException
      */
     private void initializeConnection() throws MqttException {
-        initClient();
-
+        initClient();        
+        
+        if ( client.isConnected() )
+            return;
+        
         MqttConnectOptions connectOptions = new MqttConnectOptions();
         connectOptions.setCleanSession(true);
 
         /* Conneting to Broker */
         client.connect(connectOptions);
-        
+
         /* subscribe section */
         client.subscribe(ChannelEnum.ALL_CONNECTED.getChannelEnum());
         client.subscribe(ChannelEnum.FIRST_CONNECTION.getChannelEnum());
         client.setCallback(this);
 
         /* Public message */
-        publish("AllConnected", "Client " + clientID + " is connected. " + "\n");      
+        publish("AllConnected", "Client " + clientID + " is connected. " + "\n");
     }
 
     /**
      * Check Connection
+     *
      * @throws MqttException
      */
     private void checkConnection() throws MqttException {
-        initClient();
+        initializeConnection();
     }
 
     /**
      * Public message
+     *
      * @param topic
      * @param message
      */
@@ -119,12 +128,13 @@ public class MQTTClient implements MqttCallback {
         mqttMessage.setQos(qos);
 
         client.publish(topic, mqttMessage);
-    }    
+    }
 
     /**
-     * Subscribe to channel 
+     * Subscribe to channel
+     *
      * @param topic
-     * @throws MqttException 
+     * @throws MqttException
      */
     public void topicSubscribe(String topic) throws MqttException {
         checkConnection();
@@ -133,12 +143,23 @@ public class MQTTClient implements MqttCallback {
 
     /**
      * Unsubscribe to channel
+     *
      * @param topic
-     * @throws MqttException 
+     * @throws MqttException
      */
     public void topicUnsubscribe(String topic) throws MqttException {
         checkConnection();
         client.unsubscribe(topic);
+    }
+
+    @Override
+    public void messageArrived(String topic, MqttMessage mqttMessage) throws Exception {
+
+        EventManager.getInstance().updateMessage(topic, mqttMessage);
+
+        System.out.println("MQTTClient TOPIC: " + topic);
+        System.out.println("MQTTClient MESSAGE: " + new String(mqttMessage.getPayload()));
+
     }
 
     @Override
@@ -147,35 +168,35 @@ public class MQTTClient implements MqttCallback {
     }
 
     @Override
-    public void messageArrived(String topic, MqttMessage mm) throws Exception {
-        System.out.println("TOPIC: " + topic);
-        System.out.println("MESSAGE: " + new String(mm.getPayload()));
-
-//        // Non mi è chiaro cosa vuoi fare    <<<<<<<<<<<<<<<<<<<<<<<<<<<------------------------- 
-//        if (topic.equals(Topics.ACK_LOGIN.getTopic() + "/" + clientID)) {
-//
-//            String message = new String(mm.getPayload());
-//            if (message.equals("ERROR:1")) {
-//                EventManager.getInstance().ackReceided(1);
-//                System.out.println("ERROR:1");
-//            }
-//        }
-//
-//        if (topic.equals("UserConnected")) {
-//            EventManager.getInstance().userConnected(new String(mm.getPayload()));
-//        }
-//        // -----------------------------------
-//
-//        if (topic.equals(subscribeMyChannel)) {
-//            System.out.println("MESSAGGIO PER ME : " + new String(mm.getPayload()));
-//        }
-    }
-
-    @Override
     public void deliveryComplete(IMqttDeliveryToken imdt) {
 //        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-    
+
+    // --------------------------------------------------------------------------------------------
+//    @Override
+//    public void messageArrived(String topic, MqttMessage mm) throws Exception {
+//        System.out.println("TOPIC: " + topic);
+//        System.out.println("MESSAGE: " + new String(mm.getPayload()));
+//
+////        // Non mi è chiaro cosa vuoi fare    <<<<<<<<<<<<<<<<<<<<<<<<<<<------------------------- 
+////        if (topic.equals(Topics.ACK_LOGIN.getTopic() + "/" + clientID)) {
+////
+////            String message = new String(mm.getPayload());
+////            if (message.equals("ERROR:1")) {
+////                EventManager.getInstance().ackReceided(1);
+////                System.out.println("ERROR:1");
+////            }
+////        }
+////
+////        if (topic.equals("UserConnected")) {
+////            EventManager.getInstance().userConnected(new String(mm.getPayload()));
+////        }
+////        // -----------------------------------
+////
+////        if (topic.equals(subscribeMyChannel)) {
+////            System.out.println("MESSAGGIO PER ME : " + new String(mm.getPayload()));
+////        }
+//    }    
 //    public void tryLogin(String username, String encryptedPassword) throws MqttException {
 //        String topic = Topics.ATTEMPT_LOGIN.getTopic() + "/" + clientID;
 //        String message = username + "," + encryptedPassword;
@@ -183,4 +204,5 @@ public class MQTTClient implements MqttCallback {
 //        topicSubscribe(Topics.ACK_LOGIN.getTopic());
 //        publish(topic, message);
 //    }    
+    // --------------------------------------------------------------------------------------------------
 }
